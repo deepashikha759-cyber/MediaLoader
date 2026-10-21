@@ -35,14 +35,22 @@ jobs:
         with:
           packages: 'platforms;android-35 build-tools;35.0.0'
 
+      - name: Extract Android project
+        run: |
+          mkdir extracted
+          unzip -q MediaLoader-With-App-Icon.zip -d extracted
+          ls -la extracted
+          test -f extracted/settings.gradle.kts
+          test -f extracted/app/build.gradle.kts
+
       - name: Build APK
-        run: gradle --no-daemon assembleDebug
+        run: gradle -p extracted --no-daemon assembleDebug
 
       - name: Upload APK
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: MediaLoader-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: extracted/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           
