@@ -35,13 +35,23 @@ jobs:
         with:
           packages: 'platforms;android-35 build-tools;35.0.0'
 
+      
       - name: Extract Android project
         run: |
-          mkdir extracted
-          unzip -q MediaLoader-With-App-Icon.zip -d extracted
-          ls -la extracted
+          ZIP_FILE=$(find . -maxdepth 1 -type f -iname '*.zip' -print -quit)
+          if [ -z "$ZIP_FILE" ]; then
+            echo "ERROR: No ZIP file found in the repository root."
+            echo "Repository files:"
+            ls -la
+            exit 1
+          fi
+          echo "Extracting: $ZIP_FILE"
+          mkdir -p extracted
+          unzip -q "$ZIP_FILE" -d extracted
+          find extracted -maxdepth 3 -type f | head -80
           test -f extracted/settings.gradle.kts
           test -f extracted/app/build.gradle.kts
+          
 
       - name: Build APK
         run: gradle -p extracted --no-daemon assembleDebug
